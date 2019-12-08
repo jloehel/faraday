@@ -1,0 +1,60 @@
+version: '3.4'
+
+services:
+  server:
+    build:
+      context: .
+      args:
+        - PYTHON_VERSION=3.7
+      target: prod
+    restart: unless-stopped
+    container_name: server
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=faraday
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - postgres
+    hostname: faraday
+    volumes:
+      - faraday_data:/usr/share/faraday/.faraday/:Z
+    networks:
+      internal-network:
+        ipv4_address: 172.16.1.101
+    extra_hosts:
+      - ${POSTGRES_HOST}:172.16.1.102
+    command: /start
+
+  postgres:
+    image: postgres:12.1
+    restart: unless-stopped
+    container_name: postgres
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=faraday
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    hostname: ${POSTGRES_HOST}
+    volumes:
+      - production_postgres_data:/var/lib/postgresql/data:Z
+      - production_postgres_data_backups:/backups:Z
+    networks:
+      internal-network:
+        ipv4_address: 172.16.1.102
+    extra_hosts:
+      - faraday:172.16.1.101
+
+volumes:
+  production_postgres_data: {}
+  production_postgres_data_backups: {}
+  faraday_data: {}
+
+networks:
+  internal-network:
+    ipam:
+      driver: default
+      config:
+      - subnet: "172.16.1.0/24"

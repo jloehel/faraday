@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+FARADAY_ADDRESS=${FARADAY_ADDRESS:-0.0.0.0}
+FARADAY_PORT=${FARADAY_PORT:-5985}
+FARADAY_WEBSOCKET_PORT=${FARADAY_WEBSOCKET_PORT:-9000}
+
+faraday-server --start --port $FARADAY_PORT --websocket_port $FARADAY_WEBSOCKET_PORT --bind_address $FARADAY_ADDRESS
