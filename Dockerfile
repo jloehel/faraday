@@ -1,11 +1,10 @@
-ARG PYTHON_VERSION=3.6
+ARG PYTHON_VERSION=3.8
 
 # ~~~~~~~~ Base - ubuntu ~~~~~~~~~~
 FROM python:${PYTHON_VERSION} as base-ubuntu
 
 RUN pip install --upgrade pip \
     && apt-get update && apt-get install -y --no-install-recommends \
-    ipython \
     pkg-config \
     libxml2-dev \
     libxslt1-dev \
@@ -13,7 +12,7 @@ RUN pip install --upgrade pip \
     libgirepository1.0-dev \
     libpng-dev \
     libpq-dev \
-    python-dev \
+    python3-dev \
     libcairo2 \
     libssl-dev \
     gcc \
@@ -36,7 +35,7 @@ RUN pip install --upgrade pip \
     gobject-introspection-dev \
     libpng-dev \
     postgresql-dev \
-    python-dev \
+    python3-dev \
     cairo-dev \
     openssl-dev \
     gcc \
@@ -54,16 +53,13 @@ VOLUME ["/root/.faraday"]
 VOLUME ["/app"]
 
 COPY requirements.txt ./
-COPY requirements_server.txt ./
 COPY requirements_extras.txt ./
 COPY requirements_dev.txt ./
 RUN pip install --no-cache-dir pycairo \
     && pip install --no-use-pep517 --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir -r requirements_server.txt \
     && pip install --no-cache-dir -r requirements_extras.txt \
     && pip install --no-cache-dir -r requirements_dev.txt \
     && rm /requirements.txt \
-    && rm /requirements_server.txt \
     && rm /requirements_extras.txt \
     && rm /requirements_dev.txt \
     && mkdir -p /root/.faraday
@@ -95,7 +91,7 @@ COPY ./docker/faraday/start /start
 COPY --from=build /root/.local/ /usr/share/faraday/.local/
 
 RUN apk upgrade --no-self-upgrade --available \
-    && apk add bash libpq libjpeg  \
+    && apk add bash libpq libjpeg libxcb \
     && pip install --upgrade pip \
     && mkdir -p /usr/share/faraday/.faraday \
     && ln -s /usr/share/faraday/.local/bin/faraday-server /usr/bin/faraday-server \
